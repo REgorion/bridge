@@ -67,6 +67,11 @@ class CrazyGamesPlatformBridge extends PlatformBridgeBase {
         return super.deviceType
     }
 
+    // social
+    get isInviteFriendsSupported() {
+        return false
+    }
+
     #currentAdvertisementIsRewarded = false
 
     #isUserAccountAvailable = false
@@ -179,6 +184,15 @@ class CrazyGamesPlatformBridge extends PlatformBridgeBase {
     }
 
     getDataFromStorage(key, storageType, tryParseJson) {
+        /*
+        if (String(key).split('.')[0] === 'mp') {
+            return new Promise((resolve) => {
+                const res = this._platformSdk.game.getInviteParam(String(key).split('.')[1])
+
+                resolve(res)
+            })
+        }
+        */
         if (storageType === STORAGE_TYPE.PLATFORM_INTERNAL) {
             return new Promise((resolve) => {
                 if (Array.isArray(key)) {
@@ -355,6 +369,15 @@ class CrazyGamesPlatformBridge extends PlatformBridgeBase {
                     reject(error)
                 })
         })
+    }
+
+    // social
+    inviteFriends(options) {
+        this._platformSdk.game.showInviteButton({
+            roomId: options,
+            param2: 'test',
+            param3: 'test2',
+        });
     }
 }
 
