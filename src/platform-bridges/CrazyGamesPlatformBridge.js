@@ -183,6 +183,42 @@ class CrazyGamesPlatformBridge extends PlatformBridgeBase {
         return super.isStorageAvailable(storageType)
     }
 
+    getRemoteConfig(options) {
+        // eslint-disable-next-line no-console
+        console.log(options);
+
+        if (!this._platformSdk) {
+            return Promise.reject(new Error('Platform SDK is not available.'));
+        }
+
+        const remoteConfigOptions = options || {};
+
+        // Добавим clientFeatures, если их нет
+        if (!remoteConfigOptions.clientFeatures) {
+            remoteConfigOptions.clientFeatures = [];
+        }
+
+        // Создаем промис для получения данных
+        return new Promise((resolve, reject) => {
+            try {
+                // Получаем массив inviteParams из переданных options
+                const inviteParams = remoteConfigOptions.inviteParams || [];
+                const result = {};
+
+                // Проходим по каждому параметру и получаем его значение
+                inviteParams.forEach((param) => {
+                    result[param] = this._platformSdk.game.getInviteParam(param);
+                });
+
+                // После получения всех данных, резолвим промис
+                resolve(result);
+            } catch (error) {
+                // В случае ошибки отклоняем промис
+                reject(error);
+            }
+        });
+    }
+
     getDataFromStorage(key, storageType, tryParseJson) {
         /*
         if (String(key).split('.')[0] === 'mp') {
@@ -373,11 +409,18 @@ class CrazyGamesPlatformBridge extends PlatformBridgeBase {
 
     // social
     inviteFriends(options) {
-        this._platformSdk.game.showInviteButton({
-            roomId: options,
-            param2: 'test',
-            param3: 'test2',
-        });
+        try {
+            if (options.hide) {
+                this._platformSdk.game.hideInviteButton();
+            } else {
+                this._platformSdk.game.showInviteButton(options);
+            }
+        } catch (error) {
+            console.error('Error processing options:', error);
+            throw new Error('Failed to process options. Please provide valid JSON.');
+        }
+
+        return Promise.resolve(true);
     }
 }
 
